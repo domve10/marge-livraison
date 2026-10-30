@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculateur de marge livraison – Uber Eats, Deliveroo, Takeaway.com</title>
+<meta name="description" content="Outil gratuit : calculez la vraie marge d'un plat vendu sur Uber Eats, Deliveroo et Takeaway.com (Belgique, TVA 6 %).">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap head-row">
+    <div>
+      <p class="kicker" data-i18n="kicker">Carnet du chef · Bruxelles</p>
+      <h1 data-i18n="title">Quelle est la vraie marge de votre plat en livraison ?</h1>
+    </div>
+    <nav class="lang" aria-label="Langue / Language">
+      <button type="button" data-lang="fr" class="active">FR</button>
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="nl">NL</button>
+    </nav>
+  </div>
+  <div class="wrap"><p class="lead" data-i18n="lead">Entrez le prix affiché sur l'application, votre coût matière et l'emballage : l'outil calcule la TVA, la commission, ce qui vous reste vraiment, et le prix à afficher pour garder votre marge.</p></div>
+</header>
+
+<main class="wrap">
+  <section class="card" id="inputs">
+    <h2 data-i18n="h_dish">Votre plat</h2>
+    <div class="grid">
+      <label class="full"><span data-i18n="l_name">Nom du plat</span>
+        <input id="name" type="text" value="Lasagne al forno" maxlength="80"></label>
+      <label><span data-i18n="l_price">Prix de vente sur l'app (TVAC, €)</span>
+        <input id="price" type="number" inputmode="decimal" min="0" step="0.01" value="16"></label>
+      <label><span data-i18n="l_food">Coût matière par portion (€)</span>
+        <input id="food" type="number" inputmode="decimal" min="0" step="0.01" value="4.50"></label>
+      <label><span data-i18n="l_pack">Coût emballage (€)</span>
+        <input id="pack" type="number" inputmode="decimal" min="0" step="0.01" value="0.60"></label>
+      <label><span data-i18n="l_promo">Promo / réduction financée par vous (%)</span>
+        <input id="promo" type="number" inputmode="decimal" min="0" max="100" step="1" value="0"></label>
+      <label><span data-i18n="l_vat">TVA (%)</span>
+        <input id="vat" type="number" inputmode="decimal" min="0" max="50" step="0.5" value="6">
+        <small data-i18n="vat_note">6 % : taux belge pour les plats à emporter / livrés (hors boissons).</small></label>
+      <label><span data-i18n="l_target">Marge brute visée (%)</span>
+        <input id="target" type="number" inputmode="decimal" min="0" max="99" step="1" value="68">
+        <small data-i18n="target_note">Typiquement 65–70 % en restauration.</small></label>
+    </div>
+
+    <h2 data-i18n="h_platform">Plateforme</h2>
+    <div class="platforms" id="platforms"></div>
+    <p class="note" data-i18n="est_note">⚠️ Les taux Deliveroo et Takeaway.com sont des estimations : ces plateformes négocient restaurant par restaurant. Remplacez-les par le taux de votre contrat.</p>
+  </section>
+
+  <section class="card result" id="result" aria-live="polite">
+    <h2><span data-i18n="h_result">Résultat pour</span> « <span id="r_name"></span> » – <span id="r_platform"></span></h2>
+    <dl class="rows">
+      <div><dt data-i18n="r_paid">Prix payé par le client (après promo)</dt><dd id="r_paid"></dd></div>
+      <div><dt data-i18n="r_vat">TVA à reverser</dt><dd id="r_vat"></dd></div>
+      <div><dt data-i18n="r_ht">Prix hors TVA</dt><dd id="r_ht"></dd></div>
+      <div><dt data-i18n="r_comm">Commission plateforme</dt><dd id="r_comm"></dd></div>
+      <div class="strong"><dt data-i18n="r_net">Revenu net (ce que vous recevez, HTVA)</dt><dd id="r_net"></dd></div>
+      <div><dt data-i18n="r_costs">Coût matière + emballage</dt><dd id="r_costs"></dd></div>
+      <div class="big"><dt data-i18n="r_margin">Marge brute</dt><dd id="r_margin"></dd></div>
+      <div><dt data-i18n="r_marginpct">Marge brute (% du revenu net)</dt><dd id="r_marginpct"></dd></div>
+      <div><dt data-i18n="r_marginttc">Marge brute (% du prix affiché)</dt><dd id="r_marginttc"></dd></div>
+      <div><dt data-i18n="r_fc">Food cost (% du prix HTVA)</dt><dd id="r_fc"></dd></div>
+    </dl>
+    <div class="suggest" id="suggest"></div>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="h_compare">Le même plat, plateforme par plateforme</h2>
+    <div class="table-scroll">
+      <table id="compare">
+        <thead><tr>
+          <th data-i18n="c_platform">Plateforme</th>
+          <th data-i18n="c_rate">Commission</th>
+          <th data-i18n="c_comm">Commission €</th>
+          <th data-i18n="c_net">Revenu net</th>
+          <th data-i18n="c_margin">Marge €</th>
+          <th data-i18n="c_pct">Marge %</th>
+          <th data-i18n="c_sugg">Prix conseillé</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="note" data-i18n="c_note">« Prix conseillé » = prix TVAC à afficher sur l'app pour atteindre votre marge brute visée.</p>
+  </section>
+
+  <details class="card how">
+    <summary data-i18n="h_how">Comment c'est calculé</summary>
+    <div data-i18n-html="how">
+      <ul>
+        <li><b>Prix payé</b> = prix affiché × (1 − promo %).</li>
+        <li><b>TVA</b> = prix payé × TVA / (100 + TVA). Les prix sur l'app sont TVAC.</li>
+        <li><b>Commission</b> = prix payé × taux (les plateformes facturent la commission sur le montant TVAC du panier).</li>
+        <li><b>Revenu net</b> = prix payé − TVA − commission.</li>
+        <li><b>Marge brute</b> = revenu net − coût matière − emballage. En % : marge / revenu net.</li>
+        <li><b>Food cost %</b> = coût matière / prix HTVA.</li>
+        <li><b>Prix conseillé</b> = (matière + emballage) / [(1 − marge visée) × (1 − promo) × (1/(1+TVA) − commission)].</li>
+        <li>La TVA 21 % facturée sur la commission n'est pas comptée : elle est récupérable si vous êtes assujetti. Frais de service, de paiement ou de marketing éventuels non inclus.</li>
+      </ul>
+    </div>
+  </details>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p class="sig" data-i18n="footer">Outil gratuit créé par Domenico Vescera, chef</p>
+    <form id="signup" class="signup" onsubmit="return false">
+      <label for="email" data-i18n="signup_label">Une version complète arrive (tous vos plats, suivi mensuel). Être informé :</label>
+      <div class="signup-row">
+        <input id="email" type="email" placeholder="vous@restaurant.be" autocomplete="email">
+        <a id="mailto" class="btn" href="mailto:acquasale@outlook.com?subject=Version%20compl%C3%A8te&body=Je%20veux%20%C3%AAtre%20inform%C3%A9%20de%20la%20version%20compl%C3%A8te" data-i18n="signup_btn">M'informer</a>
+      </div>
+      <small data-i18n="privacy">Aucun suivi, aucun cookie. Le bouton ouvre simplement votre messagerie.</small>
+    </form>
+    <p class="disclaimer" data-i18n="disclaimer">Estimations indicatives, sans valeur contractuelle. Vérifiez les taux de votre contrat.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
